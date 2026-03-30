@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project Argus — Satellite Geo-Localization Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<!-- KaTeX for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ─── CUSTOM CURSOR ──────────────────────────────────────────── -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ─── TOPBAR ────────────────────────────────────────────────── -->
+<header class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="brand-icon">
+        <circle cx="12" cy="12" r="2"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
+      </svg>
+      <span class="brand-name">PROJECT ARGUS</span>
+    </div>
+    <div class="status-ticker" id="statusTicker">
+      <span class="ticker-dot"></span>
+      <span class="ticker-text" id="tickerText">ALL SYSTEMS NOMINAL</span>
+    </div>
+    <div class="topbar-badges">
+      <span class="badge badge-slate">v1.0.0</span>
+      <span class="badge badge-slate">AGPL-3.0</span>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ─── LAYOUT ────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="#hero"         class="nav-link active" data-section="hero">Overview</a>
+      <a href="#architecture" class="nav-link"         data-section="architecture">Architecture</a>
+      <a href="#cv-logic"     class="nav-link"         data-section="cv-logic">CV &amp; ML Logic</a>
+      <a href="#workflow"     class="nav-link"         data-section="workflow">Workflow</a>
+      <a href="#components"   class="nav-link"         data-section="components">Components</a>
+      <a href="#telemetry"    class="nav-link"         data-section="telemetry">Telemetry</a>
+      <a href="#sovereign"    class="nav-link"         data-section="sovereign">Sovereign View</a>
+      <a href="#install"      class="nav-link"         data-section="install">Installation</a>
+    </nav>
+    <div class="sidebar-resources">
+      <div class="sidebar-section-label">Resources</div>
+      <a href="https://github.com/parthbhanti22/seopc-ground-station-epics" class="resource-link">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        GitHub
+      </a>
+      <a href="https://drive.google.com/drive/folders/16RaMt8ghuxBIAxdT7suUXwjosL0ZUlJw?usp=sharing" class="resource-link">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Zip File
+      </a>
+      <a href="https://www.docker.com/products/docker-hub/" class="resource-link">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Docker
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- ═══════════════ HERO ═══════════════ -->
+    <section class="section" id="hero">
+      <div class="grid-bg"></div>
+      <div class="section-inner hero-inner">
+        <div class="hero-eyebrow reveal">
+          <span class="glow-dot"></span>
+          <span>SOVEREIGN SATELLITE INTELLIGENCE SYSTEM</span>
+        </div>
+        <h1 class="hero-title reveal" style="animation-delay:.1s">
+          <span class="title-white">PROJECT</span><br/>
+          <span class="title-accent">ARGUS</span>
+        </h1>
+        <p class="hero-desc reveal" style="animation-delay:.2s">
+          A fully containerized, event-driven satellite intelligence pipeline — ingesting raw EO imagery,
+          geo-localizing it via a <span class="accent-cyan">Vision Transformer</span>, and streaming
+          live telemetry to a terminal dashboard and real-time GUI viewer.
+        </p>
+        <div class="hero-badges reveal" style="animation-delay:.3s">
+          <span class="badge badge-emerald">Go</span>
+          <span class="badge badge-amber">Python</span>
+          <span class="badge badge-cyan">ViT-Base/16</span>
+          <span class="badge badge-violet">Redpanda</span>
+          <span class="badge badge-teal">PostGIS</span>
+          <span class="badge badge-cyan">MinIO</span>
+          <span class="badge badge-rose">Raylib</span>
+          <span class="badge badge-amber">Prometheus</span>
+        </div>
+        <div class="hero-stats reveal" style="animation-delay:.4s">
+          <div class="stat-card">
+            <div class="stat-value">874</div>
+            <div class="stat-label">Reference Tiles</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">768</div>
+            <div class="stat-label">Embedding Dims</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">~3ms</div>
+            <div class="stat-label">Cosine Search</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">100ms</div>
+            <div class="stat-label">Dashboard Poll</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ARCHITECTURE ═══════════════ -->
+    <section class="section" id="architecture">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 01 — system design</span>
+          <h2 class="section-title">Architecture</h2>
+          <p class="section-subtitle">An event-driven pipeline built on battle-tested primitives — chosen for performance, operational simplicity, and future scale.</p>
+        </div>
+
+        <!-- Pipeline diagram -->
+        <div class="pipeline-diagram reveal">
+          <svg id="archSvg" viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+        <div class="why-grid reveal">
+          <div class="why-card">
+            <div class="why-icon">⚡</div>
+            <h3>Why Redpanda over Kafka?</h3>
+            <p>Redpanda is written in C++ using the Seastar async framework. It eliminates ZooKeeper, ships as a single binary, and delivers 10× lower median produce latency. Full Kafka 3.x API compatibility — zero client code changes.</p>
+          </div>
+          <div class="why-card">
+            <div class="why-icon">🐹</div>
+            <h3>Why Go for the watcher?</h3>
+            <p>Go's goroutine model makes it trivial to watch directories at kernel speed (inotify via fsnotify) while concurrently uploading to MinIO and producing events. The compiled binary is 8 MB and idles at &lt;1% CPU.</p>
+          </div>
+          <div class="why-card">
+            <div class="why-icon">🪣</div>
+            <h3>Why MinIO?</h3>
+            <p>S3-API compatible, runs on a single node with erasure-coding durability, and has a Go SDK with streaming upload support. Swapping MinIO for AWS S3 in production requires zero code changes.</p>
+          </div>
+          <div class="why-card">
+            <div class="why-icon">🗺️</div>
+            <h3>Why PostGIS?</h3>
+            <p>Future spatial queries — bounding-box filtering, trajectory reconstruction, proximity alerts — require a spatial index. PostGIS gives us these for free on top of PostgreSQL, making the schema forward-compatible.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ CV LOGIC ═══════════════ -->
+    <section class="section" id="cv-logic">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 02 — machine learning</span>
+          <h2 class="section-title">CV &amp; ML Logic</h2>
+          <p class="section-subtitle">How a Vision Transformer turns raw pixels into GPS coordinates — the mathematics behind the prediction.</p>
+        </div>
+
+        <div class="math-card reveal">
+          <h3 class="math-card-title">ViT-Base/16 Embedding Pipeline</h3>
+          <p class="math-text">The satellite tile is resized to $224 \times 224$ and partitioned into non-overlapping patches of size $16 \times 16$, yielding:</p>
+          <div class="math-block">$$N = \left(\frac{224}{16}\right)^2 = 196 \text{ patches}$$</div>
+          <p class="math-text">Each patch is flattened and linearly projected to a $D = 768$-dimensional embedding. A learnable <span class="accent-cyan font-mono">[CLS]</span> token is prepended. With positional encodings added:</p>
+          <div class="math-block">$$z_0 = \left[x_\text{cls};\, x^1_p E;\, x^2_p E;\, \ldots;\, x^N_p E\right] + E_\text{pos}, \quad E \in \mathbb{R}^{(P^2 \cdot C) \times D}$$</div>
+          <p class="math-text">The sequence passes through $L = 12$ Transformer encoder layers, each consisting of Multi-Head Self-Attention (MSA) and MLP sub-layers with layer normalization:</p>
+          <div class="math-block">$$z'_\ell = \text{MSA}\!\left(\text{LN}(z_{\ell-1})\right) + z_{\ell-1}$$</div>
+          <div class="math-block">$$z_\ell = \text{MLP}\!\left(\text{LN}(z'_\ell)\right) + z'_\ell$$</div>
+          <p class="math-text">After all $L$ layers, the CLS token output $z^0_L \in \mathbb{R}^{768}$ is extracted as the scene embedding. It is <strong>L2-normalized</strong> before storage and retrieval.</p>
+        </div>
+
+        <div class="math-card reveal" style="animation-delay:.15s">
+          <h3 class="math-card-title">Cosine Similarity Geo-Search</h3>
+          <p class="math-text">Given query embedding $\mathbf{q}$ and corpus matrix $E \in \mathbb{R}^{874 \times 768}$, cosine similarity is computed for all reference tiles simultaneously:</p>
+          <div class="math-block">$$\text{sim}(\mathbf{q},\, \mathbf{e}_i) = \frac{\mathbf{q} \cdot \mathbf{e}_i}{\|\mathbf{q}\|\,\|\mathbf{e}_i\|}$$</div>
+          <p class="math-text">Since embeddings are pre-L2-normalized ($\|\mathbf{e}_i\| = 1$), this reduces to a dot product — vectorised as a single matrix-vector multiply completing in <span class="accent-emerald">~3 ms on CPU</span>.</p>
+          <p class="math-text">The top-$k = 5$ matches are selected. A softmax-temperature-weighted mean GPS coordinate is derived:</p>
+          <div class="math-block">$$\hat{y} = \sum_{i \in \text{TopK}} \text{softmax}\!\left(\frac{\text{sim}(\mathbf{q}, \mathbf{e}_i)}{\tau}\right) \cdot (\text{lat}_i,\, \text{lon}_i)$$</div>
+          <p class="math-text">where $\tau = 0.07$ sharpens the weight distribution, ensuring the closest match dominates the prediction.</p>
+        </div>
+
+        <div class="model-stats-grid reveal">
+          <div class="model-stat"><div class="ms-label">Architecture</div><div class="ms-value">vit_base_patch16_224</div><div class="ms-sub">via timm</div></div>
+          <div class="model-stat"><div class="ms-label">Patch Size</div><div class="ms-value">16 × 16 px</div><div class="ms-sub">196 tokens</div></div>
+          <div class="model-stat"><div class="ms-label">CLS Dim</div><div class="ms-value">768-D float32</div><div class="ms-sub">L2-normalized</div></div>
+          <div class="model-stat"><div class="ms-label">Corpus</div><div class="ms-value">874 tiles</div><div class="ms-sub">Sentinel-2, Mumbai</div></div>
+          <div class="model-stat"><div class="ms-label">Search Time</div><div class="ms-value">~3ms CPU</div><div class="ms-sub">dot-product matmul</div></div>
+          <div class="model-stat"><div class="ms-label">Avg Error</div><div class="ms-value accent-emerald">≈ 1.2 km</div><div class="ms-sub">at 10m GSD</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ WORKFLOW ═══════════════ -->
+    <section class="section" id="workflow">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 03 — pipeline trace</span>
+          <h2 class="section-title">Workflow Visualization</h2>
+          <p class="section-subtitle">Follow a single satellite tile from raw downlink to geo-localized result.</p>
+        </div>
+
+        <div class="stepper reveal">
+          <!-- Step dots -->
+          <div class="stepper-dots" id="stepperDots"></div>
+          <!-- Step controls -->
+          <div class="stepper-controls">
+            <button class="btn-secondary" id="stepPrev">← PREV</button>
+            <button class="btn-auto" id="stepAuto">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              AUTO
+            </button>
+            <button class="btn-secondary" id="stepReset">↺ RESET</button>
+            <button class="btn-primary" id="stepNext">NEXT →</button>
+          </div>
+          <!-- Step content -->
+          <div class="step-content" id="stepContent"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ COMPONENTS ═══════════════ -->
+    <section class="section" id="components">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 04 — service catalog</span>
+          <h2 class="section-title">Component Breakdown</h2>
+          <p class="section-subtitle">Every service in the stack — its language, role, and key dependencies.</p>
+        </div>
+        <div class="component-grid reveal" id="componentGrid"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ TELEMETRY ═══════════════ -->
+    <!-- <section class="section" id="telemetry">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 05 — observability</span>
+          <h2 class="section-title">Live Telemetry</h2>
+          <p class="section-subtitle">Simulated real-time metrics from the processing pipeline.</p>
+        </div>
+
+        <div class="telemetry-kpis reveal" id="telemetryKpis">
+          <div class="kpi-card"><div class="kpi-label">P95 Latency</div><div class="kpi-value cyan" id="kpiLatency">--ms</div></div>
+          <div class="kpi-card"><div class="kpi-label">Throughput</div><div class="kpi-value emerald" id="kpiThroughput">-- img/s</div></div>
+          <div class="kpi-card"><div class="kpi-label">Avg Confidence</div><div class="kpi-value violet" id="kpiConfidence">--%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Tiles Processed</div><div class="kpi-value amber" id="kpiTiles">12,847</div></div>
+          <button class="live-toggle active" id="liveToggle">
+            <span class="live-dot"></span> LIVE
+          </button>
+        </div>
+
+        <div class="charts-grid reveal" style="animation-delay:.1s">
+          <div class="chart-card">
+            <div class="chart-label">INFERENCE LATENCY (ms)</div>
+            <canvas id="latencyChart" height="160"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-label">THROUGHPUT (images/sec)</div>
+            <canvas id="throughputChart" height="160"></canvas>
+          </div>
+        </div>
+      </div>
+    </section> -->
+
+    <!-- ═══════════════ SOVEREIGN VIEW ═══════════════ -->
+    <section class="section" id="sovereign">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 06 — gui mockup</span>
+          <h2 class="section-title">Sovereign View</h2>
+          <p class="section-subtitle">The Raylib GUI renders the latest processed tile with a geo-lock crosshair over the predicted GPS centroid.</p>
+        </div>
+
+        <div class="sovereign-wrap reveal">
+          <div class="sovereign-gui" id="sovereignGui">
+            <canvas id="terrainCanvas"></canvas>
+            <!-- HUD overlays -->
+            <div class="hud-tl">
+              <div class="hud-status"><span class="glow-dot small"></span> ARGUS-01 ACTIVE</div>
+              <div class="hud-sub">SENSOR: ViT-B/16</div>
+              <div class="hud-sub">MODE: GEO-LOCK</div>
+            </div>
+            <div class="hud-tr">
+              <div class="hud-coord emerald" id="hudLat">LAT 19.0760°N</div>
+              <div class="hud-coord emerald" id="hudLon">LON 72.8777°E</div>
+              <div class="hud-coord cyan" id="hudConf">CONF 93.4%</div>
+            </div>
+            <div class="hud-bl">
+              <div class="hud-sub">GSD: 10m | SCENE: MUM-0524</div>
+              <div class="hud-sub blink-slow" id="hudStatus">● COSINE SEARCH COMPLETE — TOP-5 LOADED</div>
+            </div>
+            <div class="hud-br">
+              <div class="hud-sub">SOVEREIGN VIEW v1.0</div>
+            </div>
+            <!-- Corner brackets -->
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <!-- Crosshair -->
+            <div class="crosshair-wrap" id="crosshairWrap">
+              <div class="crosshair-ring outer"></div>
+              <div class="crosshair-ring inner"></div>
+              <div class="crosshair-line h left"></div>
+              <div class="crosshair-line h right"></div>
+              <div class="crosshair-line v top"></div>
+              <div class="crosshair-line v bottom"></div>
+              <div class="crosshair-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sovereign-info reveal">
+          <div class="info-card">
+            <div class="info-label">HOW IT WORKS</div>
+            <ul class="info-list">
+              <li><svg class="li-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>local_sync/latest_processed.jpg is written atomically by the processor worker.</li>
+              <li><svg class="li-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>The Raylib GUI polls the file's mod-time every frame (sub-ms overhead).</li>
+              <li><svg class="li-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>On change, it reloads the texture — no IPC, no network required.</li>
+              <li><svg class="li-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>GPS coords are painted as a crosshair overlay with confidence HUD.</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <div class="info-label">HUD ELEMENTS</div>
+            <ul class="info-list">
+              <li><svg class="li-icon cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>Corner brackets — viewport boundary indicators.</li>
+              <li><svg class="li-icon cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>Scan-line effect — CRT aesthetic render pass.</li>
+              <li><svg class="li-icon cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>Crosshair rings — pulsing geo-lock confidence indicator.</li>
+              <li><svg class="li-icon cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>Coordinate overlay — LAT/LON + confidence percentage.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ INSTALLATION ═══════════════ -->
+    <section class="section" id="install">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <span class="section-eyebrow">// 07 — quick start</span>
+          <h2 class="section-title">Installation Guide</h2>
+          <p class="section-subtitle">From zero to live pipeline in one command. Prerequisites: Docker, Go 1.21+, GCC + libraylib-dev, tmux.</p>
+        </div>
+
+        <div class="install-steps reveal">
+          <div class="code-block-wrap">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <span class="code-title">terminal — clone &amp; launch</span>
+              <button class="copy-btn" data-code="clone">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>COPY</span>
+              </button>
+            </div>
+            <pre class="code-content" id="code-clone"><code><span class="c-comment"># Clone the repository</span>
+<span class="c-cmd">git</span> <span class="c-arg">clone</span> <span class="c-str">https://github.com/your-username/seopc-project.git</span>
+<span class="c-cmd">cd</span> seopc-project
+
+<span class="c-comment"># Make scripts executable</span>
+<span class="c-cmd">chmod</span> <span class="c-arg">+x</span> launch.sh feed.sh
+
+<span class="c-comment"># One-command launch (opens tmux with 4 panes)</span>
+<span class="c-cmd">./launch.sh</span></code></pre>
+          </div>
+
+          <div class="code-block-wrap" style="animation-delay:.1s">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <span class="code-title">terminal — feed satellite tiles</span>
+              <button class="copy-btn" data-code="feed">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>COPY</span>
+              </button>
+            </div>
+            <pre class="code-content" id="code-feed"><code><span class="c-comment"># Drip-feed tiles every 5s (default)</span>
+<span class="c-cmd">bash</span> feed.sh
+
+<span class="c-comment"># Custom interval (30s)</span>
+<span class="c-cmd">bash</span> feed.sh <span class="c-num">30</span>
+
+<span class="c-comment"># Manually inject a single tile</span>
+<span class="c-cmd">sudo</span> <span class="c-cmd">docker</span> <span class="c-arg">cp</span> tiles/tile_0001.jpg \
+  seopc-project-satellite-1:/downlink_buffer/</code></pre>
+          </div>
+
+          <div class="code-block-wrap" style="animation-delay:.2s">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <span class="code-title">terminal — teardown</span>
+              <button class="copy-btn" data-code="down">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>COPY</span>
+              </button>
+            </div>
+            <pre class="code-content" id="code-down"><code><span class="c-comment"># Press Q in the dashboard pane to exit TUI, then:</span>
+<span class="c-cmd">sudo</span> <span class="c-cmd">docker</span> <span class="c-arg">compose</span> down</code></pre>
+          </div>
+        </div>
+
+        <div class="endpoints-grid reveal" style="animation-delay:.3s">
+          <div class="endpoint-card">
+            <div class="info-label">OBSERVABILITY ENDPOINTS</div>
+            <div class="endpoint-row"><span>Prometheus</span><span class="endpoint-val">localhost:9090</span></div>
+            <div class="endpoint-row"><span>Grafana</span><span class="endpoint-val">localhost:3000</span></div>
+            <div class="endpoint-row"><span>MinIO Console</span><span class="endpoint-val">localhost:9001</span></div>
+          </div>
+          <div class="endpoint-card">
+            <div class="info-label">WHAT launch.sh DOES</div>
+            <div class="step-list">
+              <div class="step-item"><span class="step-num">1.</span>Brings up Docker services in dependency order (Redpanda → MinIO → PostGIS → Satellite → Processor)</div>
+              <div class="step-item"><span class="step-num">2.</span>Waits for PostGIS health check to pass</div>
+              <div class="step-item"><span class="step-num">3.</span>Opens a tmux session with 4 panes: logs / dashboard / GUI / feeder</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="brand-icon">
+            <circle cx="12" cy="12" r="2"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
+          </svg>
+          PROJECT ARGUS
+        </div>
+        <div class="footer-meta">AGPL-3.0 · Sentinel-2 Dataset · ViT-Base/16 via timm</div>
+      </div>
+    </footer>
+
+  </main><!-- /main-content -->
+</div><!-- /layout -->
+
+<script src="app.js"></script>
+</body>
+</html>
