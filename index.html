@@ -358,8 +358,8 @@
       <div class="section-inner">
         <div class="section-header reveal">
           <span class="section-eyebrow">// 07 — quick start</span>
-          <h2 class="section-title">Installation Guide</h2>
-          <p class="section-subtitle">From zero to live pipeline in one command. Prerequisites: Docker, Go 1.21+, GCC + libraylib-dev, tmux.</p>
+          <h2 class="section-title">Quick Start</h2>
+          <p class="section-subtitle">Prerequisites: Docker + Docker Compose, WSL2 (Debian/Ubuntu recommended) or native Linux, Go 1.21+, GCC + libraylib-dev (for GUI), tmux.</p>
         </div>
 
         <div class="install-steps reveal">
@@ -380,7 +380,10 @@
 <span class="c-cmd">chmod</span> <span class="c-arg">+x</span> launch.sh feed.sh
 
 <span class="c-comment"># One-command launch (opens tmux with 4 panes)</span>
-<span class="c-cmd">./launch.sh</span></code></pre>
+<span class="c-cmd">./launch.sh</span>
+
+<span class="c-comment"># Force rebuild Docker images</span>
+<span class="c-cmd">./launch.sh</span> <span class="c-arg">--rebuild</span></code></pre>
           </div>
 
           <div class="code-block-wrap" style="animation-delay:.1s">
@@ -427,9 +430,19 @@
           <div class="endpoint-card">
             <div class="info-label">WHAT launch.sh DOES</div>
             <div class="step-list">
-              <div class="step-item"><span class="step-num">1.</span>Brings up Docker services in dependency order (Redpanda → MinIO → PostGIS → Satellite → Processor)</div>
+              <div class="step-item"><span class="step-num">1.</span>Brings up all Docker services in dependency order (Redpanda → MinIO → PostGIS → Satellite → Processor)</div>
               <div class="step-item"><span class="step-num">2.</span>Waits for PostGIS health check to pass</div>
               <div class="step-item"><span class="step-num">3.</span>Opens a tmux session with 4 panes: logs / dashboard / GUI / feeder</div>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="info-label">CV MODEL DETAILS</div>
+            <div class="step-list">
+              <div class="step-item"><span class="step-num">1.</span><strong>Architecture:</strong> <span class="endpoint-val">vit_base_patch16_224</span> via <span class="endpoint-val">timm</span> (pretrained on ImageNet)</div>
+              <div class="step-item"><span class="step-num">2.</span><strong>Embedding:</strong> CLS token (768-dim), L2-normalized</div>
+              <div class="step-item"><span class="step-num">3.</span><strong>Retrieval:</strong> Cosine similarity against 874 reference tile embeddings</div>
+              <div class="step-item"><span class="step-num">4.</span><strong>Prediction:</strong> Weighted mean of top-5 match GPS coordinates</div>
+              <div class="step-item"><span class="step-num">5.</span><strong>Dataset:</strong> Tiles generated from Sentinel-2 satellite imagery over Mumbai/Navi Mumbai</div>
             </div>
           </div>
         </div>
